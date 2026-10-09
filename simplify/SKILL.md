@@ -1,14 +1,34 @@
 ---
-name: explain-and-refactor
-description: Simplify code through independent behavioral explanations, pseudocode, critical debate, and verified refactoring. Use for explanation-first reviews or iterative clarity passes that make an implementation follow its conceptual model.
+name: simplify
+description: Simplify a handful of recently written modules through independent behavioral explanations, pseudocode, critical debate, and verified refactoring. Use for focused clarity reviews; whole-program simplification requires explicit user authorization.
 ---
 
-# Explain and refactor
+# Simplify
 
 Make the implementation a readable representation of the intended behavior.
 Work within the requested files and interfaces, preserving earlier approved
 behavior unless the user asks to change it. Carry the user's corrections, scope,
 style constraints, and verification requirements through every pass.
+
+## Bound the scope
+
+By default, restrict simplification to a handful of recently written modules.
+Identify that set from the user's request and the current task's recent work, then state the
+scope before editing. If neither a clear, small set nor an explicitly authorized
+broader scope is established, ask which modules to simplify. Recent Git history
+can help locate candidates; it does not authorize refactoring every changed file.
+
+Whole-program simplification is allowed only when the user explicitly sanctions
+it. Existing explicit scope authorization remains valid across passes. An
+instruction to keep simplifying or repeat until no further improvement is
+possible extends the number of passes, not the set of modules.
+
+Read dependencies when needed to understand behavior, but keep refactoring edits
+within the agreed modules. Do not expand into older callers, shared utilities,
+or previously approved code to make a local simplification easier. Keep any
+test or documentation edits within the user's permitted remit too. If a useful
+change requires broader scope, describe it and obtain authorization before
+making that change; continue useful work inside the existing scope.
 
 ## Obtain an independent explanation
 
@@ -76,11 +96,38 @@ needed distinctions. Introduce a record, flag, or abstraction only when it makes
 the model clearer. Fewer lines or traversals do not by themselves establish a
 simplification; separate straightforward passes may be easier to understand.
 
-If the user requests a function-length target, measure formatted functions,
-including local and anonymous functions. Split by responsibility rather than
-compressing expressions onto fewer lines or adding numbered continuation
-helpers. Apply line-width limits and other style requirements from the task;
-do not turn one project's preferences into universal rules.
+## Keep functions small and code direct
+
+**Target at most 10 LOC per function by default**, including local and anonymous
+functions. Measure complete functions after normal formatting, following the
+repository's counting convention when one exists. Split at meaningful operations;
+do not pack statements onto fewer lines, remove useful comments, or introduce
+numbered continuation helpers to meet the count. Respect line-width and other
+style constraints. Review every function over the target. A coherent exhaustive
+dispatch or operation may remain longer when splitting would obscure its meaning;
+report such exceptions and explain why. Explicit user requirements take precedence.
+
+Use Per Vognsen's [Bitwise](https://github.com/pervognsen/bitwise), preserved at
+[tsnl/bitwise](https://github.com/tsnl/bitwise), as an important style reference.
+The [Ion constructors](https://github.com/tsnl/bitwise/blob/5a261e99efea080e1111a312d897f8d794f061a7/ion/ast.c)
+and [parser](https://github.com/tsnl/bitwise/blob/5a261e99efea080e1111a312d897f8d794f061a7/ion/parse.c)
+give concrete examples. Apply the following interpretation, also developed in
+[Resin's Bitwise essay](https://github.com/tsnl/resin/blob/7a19915229414242bad5ecd7763299532610a02b/doc/bitwise.md):
+
+- Let data representations expose the important objects and their relationships.
+  Construction should establish the guarantees later operations depend on.
+- Make control flow follow the problem: visible cases, stages, loops, and
+  structural recursion that a reader can explain locally.
+- Give each helper a complete decision or guarantee with a descriptive name.
+  Share semantic rules; similar-looking statements alone do not justify an
+  abstraction. Keep useful repetition when it makes distinct cases easier to read.
+- Prefer existing language facilities and a small public interface. Add custom
+  utilities or generic machinery only for a demonstrated need. Keep explanatory
+  comments about invariants, ownership, and deliberate tradeoffs.
+
+Adapt this taste to the target language and repository. The 10-LOC target is this
+skill's convention, not a claim that Bitwise itself imposes that limit. Judge a
+change by the reasoning it saves the reader, as well as the size of its functions.
 
 ## Verify and repeat
 
