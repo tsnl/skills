@@ -6,7 +6,7 @@ project, model provider, or host-specific tool names.
 
 ## Available skills
 
-- [explain-and-refactor](skills/explain-and-refactor/SKILL.md): simplify code through
+- [explain-and-refactor](explain-and-refactor/SKILL.md): simplify code through
   independent behavioral explanations, pseudocode, critical debate, and verified
   refactoring. Each pass uses a fresh explainer, while the parent inspects and
   edits the implementation. Preserve the user's scope and stop when further
@@ -14,15 +14,34 @@ project, model provider, or host-specific tool names.
 
 ## Use with Codex and Claude Code
 
-Both tools support skill folders and symlinked installations. Keep one checkout
-and link the skill into each tool's personal skills directory to use it across
-local projects. Adjust the checkout path if needed.
+Each skill folder lives at the repository root. In a consuming Git repository,
+add this repository directly at `.agents/skills` and link Claude Code's discovery
+directory to the same checkout:
 
 ```sh
-git clone https://github.com/tsnl/skills.git "$HOME/Developer/skills"
-mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills"
-ln -s "$HOME/Developer/skills/skills/explain-and-refactor" "$HOME/.agents/skills/"
-ln -s "$HOME/Developer/skills/skills/explain-and-refactor" "$HOME/.claude/skills/"
+git submodule add https://github.com/tsnl/skills.git .agents/skills
+mkdir -p .claude
+ln -s ../.agents/skills .claude/skills
+git add .gitmodules .agents/skills .claude/skills
+```
+
+These commands assume those paths are unused. Commit the submodule and symlink
+in the consumer repository so everyone uses the same skill revision. The result
+is `.agents/skills/explain-and-refactor/SKILL.md`, also available through
+`.claude/skills/explain-and-refactor/SKILL.md`.
+
+After cloning a consumer repository, initialize its pinned skills with:
+
+```sh
+git submodule update --init .agents/skills
+```
+
+To adopt a newer version, review and commit the updated submodule reference:
+
+```sh
+git submodule update --remote .agents/skills
+git diff --submodule=log -- .agents/skills
+git add .agents/skills
 ```
 
 Invoke it as `$explain-and-refactor` in Codex or `/explain-and-refactor` in Claude
@@ -33,16 +52,17 @@ model preferences in your request. For example:
 > fresh explainer for each pass and repeat until further changes would not improve
 > clarity. Keep all changes within the parser module and its tests.
 
-Update the shared source with:
+For personal use across projects, keep a separate checkout and link individual
+skills into each tool's personal skills directory:
 
 ```sh
-git -C "$HOME/Developer/skills" pull --ff-only
+git clone https://github.com/tsnl/skills.git "$HOME/Developer/skills"
+mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills"
+ln -s "$HOME/Developer/skills/explain-and-refactor" "$HOME/.agents/skills/"
+ln -s "$HOME/Developer/skills/explain-and-refactor" "$HOME/.claude/skills/"
 ```
 
-For repository-scoped discovery, use `.agents/skills/` for Codex and
-`.claude/skills/` for Claude Code inside that repository. For a setup shared with
-teammates, vendor or pin the skill source and use relative links within the
-repository.
+Update that personal checkout with `git -C "$HOME/Developer/skills" pull --ff-only`.
 
 The workflow honors the model and reasoning effort available and requested in
 its host. If isolated delegation is unavailable, the skill requires that the
