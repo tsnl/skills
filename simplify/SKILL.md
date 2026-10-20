@@ -73,12 +73,56 @@ the model.
 
 Target functions of at most 10 lines after normal formatting. Split at
 meaningful operations, never by packing lines or numbering helpers; an
-exhaustive dispatch may stay longer, reported as an exception. Follow Per
-Vognsen's [Bitwise](https://github.com/tsnl/bitwise) as
-[Resin's essay](https://github.com/tsnl/resin/blob/7a19915229414242bad5ecd7763299532610a02b/doc/bitwise.md)
-reads it: representations expose the problem's objects, control flow follows
-the problem, each helper makes one complete decision, and generic utilities
-need a demonstrated use.
+exhaustive dispatch may stay longer, reported as an exception.
+
+## Style
+
+Code communicates a model of the problem: a reader should find the important
+objects, follow what happens to them, and predict where a change belongs. The
+reference is Per Vognsen's [Bitwise](https://github.com/tsnl/bitwise), whose
+Ion compiler explains its machinery while making it work.
+
+- **The representation explains the operations.** A data definition says what
+  a value is; its constructor follows from its shape. A reader should
+  understand a node from its definition alone, without consulting a scope, a
+  callback, or the code that will later visit it. A constructor earns its
+  place by establishing an invariant or naming a meaningful conversion.
+- **Control flow follows the problem.** Calls, loops, and recursion should
+  mirror the subject: a parser's call graph shows precedence, and the loop
+  that accumulates a left operand shows left associativity. Repetition that
+  keeps the structure easy to survey is fine; share code only when that makes
+  the structure clearer, not merely shorter.
+- **A helper owns a complete decision.** Obtaining a canonical, interned
+  object is one operation, lookup, creation and registration together, rather
+  than steps each caller must coordinate. Reuse means answering the same
+  question for every caller; similar-looking code may implement different
+  rules. A name promises exactly what the helper establishes, with no hidden
+  second contract.
+- **Small functions hold one coherent thought.** The 10-line target prompts a
+  look at a boundary; it is not the goal. One longer loop that attaches every
+  postfix form can read better than a chain of vague forwarding helpers. An
+  exhaustive dispatch is an inventory of the cases an operation handles; keep
+  it together, extracting a case only when it has a name and reasoning of its
+  own.
+- **Existing vocabulary first.** Use the language's collections, ownership and
+  structures; a custom utility needs a concrete need they express poorly.
+  Shared utilities serve recurring needs, while the problem's rules stay in
+  the code that uses them.
+- **Comments explain what the code cannot show:** invariants, ownership,
+  lifetimes, and deliberate compromises, kept beside the representation they
+  describe. Assertions make assumptions executable. A comment that narrates
+  long bookkeeping suggests a missing operation or a representation that
+  needs too much coordination.
+- **State has an owner.** Each pass takes a bounded input and produces a
+  bounded output. A value that certifies data should travel with that data
+  and be lost when the data is edited, so a stale "checked" flag cannot
+  survive. Prefer immutable inputs to tables that must be kept in sync.
+
+When a bug appears, trace the operation and the facts it needs. Two paths
+making the same decision call for one shared operation; lost state calls for
+representing it at the boundary that needs it. A new callback or parallel
+bookkeeping map helps only if it makes the relationship clearer and has an
+owner. A successful cleanup leaves the next reader fewer facts to coordinate.
 
 ## Verify, repeat, report
 

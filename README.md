@@ -10,7 +10,7 @@ programming language, project, model provider, or host-specific tool names.
   and from the top down. A fresh explainer describes the simplest model of
   the behavior; incidental behavior is cut and reported; stages,
   representations, and stored state are trimmed before functions, which
-  target 10 lines in the style of Bitwise. Whole-program simplification
+  target 10 lines, in the style of Bitwise. Whole-program simplification
   requires explicit user authorization.
 - [install-repository-skills](install-repository-skills/SKILL.md): install or
   repair this collection in a repository, pin it at `.agents/skills`, and share
