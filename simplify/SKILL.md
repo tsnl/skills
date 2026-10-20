@@ -1,201 +1,93 @@
 ---
 name: simplify
-description: Simplify a handful of recently written modules lossily and from the top down, through independent behavioral explanations, a decision about which behavior is essential, critical debate, and verified refactoring. Use for focused clarity reviews; whole-program simplification requires explicit user authorization.
+description: Simplify recently written modules lossily and from the top down, using an independent behavioral explanation, a decision about which behavior is essential, debate, and verified refactoring. Whole-program simplification requires explicit user authorization.
 ---
 
 # Simplify
 
-Make the implementation a readable representation of the intended behavior.
-Work within the requested files and interfaces. Carry the user's corrections,
-scope, style constraints, and verification requirements through every pass.
+Make the code a direct, readable representation of the behavior that matters.
 
-Prefer lossy simplification. The best simplification removes behavior, cases,
-options, and generality that do not serve the user's purpose, rather than
-expressing all of them more neatly. Keep the behavior the user relies on; cut
-what is incidental, and say what was cut.
+- **Lossy.** The best simplification removes behavior, cases, options, and
+  generality that do not serve the user, rather than expressing them more
+  neatly. Keep what is essential; cut what is incidental; report every cut.
+- **Top-down.** A stage, protocol, representation, or piece of stored state
+  that need not exist takes every function that maintains it with it. Trim
+  those first, then modules, then functions.
 
-Work from the top down. The largest savings come from the largest structures:
-a stage, protocol, representation, or piece of stored state that need not
-exist removes every function written to maintain it. Trim those before
-refining modules, and refine modules before polishing functions.
+## Scope
 
-## Bound the scope
+By default, work on a handful of recently written modules; state the set
+before editing, and ask if it is unclear. Whole-program simplification needs
+explicit user authorization. Repeating passes does not widen the set. Read
+other code as needed, but edit only within the scope; describe changes that
+need more and ask first.
 
-By default, restrict simplification to a handful of recently written modules.
-Identify that set from the user's request and the current task's recent work, then state the
-scope before editing. If neither a clear, small set nor an explicitly authorized
-broader scope is established, ask which modules to simplify. Recent Git history
-can help locate candidates; it does not authorize refactoring every changed file.
+## Essential and incidental behavior
 
-Whole-program simplification is allowed only when the user explicitly sanctions
-it. Existing explicit scope authorization remains valid across passes. An
-instruction to keep simplifying or repeat until no further improvement is
-possible extends the number of passes, not the set of modules.
+- **Essential:** stated requirements, behavior the user or other code relies
+  on, user-visible contracts, persisted data.
+- **Incidental:** accidents of the current implementation, unused generality
+  or configuration, handling of states construction already rules out,
+  compatibility with callers that are gone, features that cost more than
+  they are used.
 
-Read dependencies when needed to understand behavior, but keep refactoring edits
-within the agreed modules. Do not expand into older callers, shared utilities,
-or previously approved code to make a local simplification easier. Keep any
-test or documentation edits within the user's permitted remit too. If a useful
-change requires broader scope, describe it and obtain authorization before
-making that change; continue useful work inside the existing scope.
+Cut incidental behavior by default, with its tests and documentation. Ask
+before cutting anything essential or explicitly requested.
 
-## Decide what is essential
+## Independent explanation
 
-Lossiness needs a line between what must survive and what may go:
+For each pass, brief a fresh explainer subagent that has no conversation
+history and does not read the code. Honor the user's model and effort choices;
+if isolated delegation is unavailable, say so.
 
-- **Essential:** stated requirements, behavior the user or other work depends
-  on, user-visible contracts, and data that must persist.
-- **Incidental:** accidents of the current implementation, configurability or
-  generality nobody uses, handling of states that construction already rules
-  out, compatibility with callers that no longer exist, and features whose
-  cost exceeds their use.
+The brief gives purpose, inputs, outputs, required semantics, examples, and
+constraints, and marks each requirement firm or negotiable. It omits current
+helper names, structure, and earlier proposals. Ask for the simplest
+sufficient model: an explanation, pseudocode, invariants, edge cases, and
+which negotiable requirements it would drop and at what cost. Ask for at most
+about 1,200 words; open-ended answers about large subsystems can stall.
 
-Cut incidental behavior by default, and remove its tests and documentation
-with it. Ask before removing essential behavior or anything the user
-explicitly requested. When it is unclear which side a behavior is on, describe
-the proposed cut and its consequence; small, reversible cuts may proceed
-within an already authorized lossy scope, provided they are reported.
+## Debate
 
-## Obtain an independent explanation
+Treat the model as a hypothesis. Working from the top down:
 
-Use a fresh explainer subagent for each simplification pass, with no inherited
-conversation history. Continue debating with that agent within the pass; start
-a new one for the next pass. The parent owns code inspection, edits, and checks.
-The explainer must not inspect repository files, implementation, or diffs.
+- Ask what breaks if a whole stage, representation, or piece of state goes,
+  and what breaks if a negotiable requirement is dropped.
+- Prefer derived state to stored state kept in sync, one decision point to
+  many, and direct calls to intermediate protocols.
+- Trace concrete examples, failures, ordering, and lifetimes.
+- Reject generic machinery and moved bookkeeping.
 
-Use the host's delegation facilities and honor the user's model and reasoning
-effort choices. This workflow does not require a particular provider or tool
-name. If isolated delegation or a requested configuration is unavailable,
-disclose that limitation. A local explanation-and-critique pass can still help
-when permitted, but do not describe it as an independent review.
+Facts from the code may inform the debate; do not turn incidental
+implementation choices into requirements. Share the refined model before
+large edits, and ask the user when intended behavior is genuinely unclear.
 
-Give the explainer a neutral behavioral brief: purpose, inputs, observable
-outputs, required semantics, representative examples, and relevant constraints.
-Distinguish requirements from assumptions and known implementation limitations,
-and mark which requirements are firm and which are negotiable.
-Do not include current helper names, internal decomposition, favored changes,
-previous proposals, or earlier agents' conclusions. Even a behavioral summary
-can bias the answer if it quietly prescribes the existing architecture.
+## Compare and refactor
 
-Ask for a high-level explanation, then more detailed pseudocode, invariants,
-edge cases, and unresolved assumptions. Ask which negotiable requirements the
-explainer would drop or weaken to get a simpler model, and what each cut would
-cost. Each proposed stage or piece of state should have an explainable purpose.
-The aim is the simplest sufficient model, not a speculative redesign or a
-complete solution to adjacent problems.
+Ask whether the code directly represents the model, comparing stages and data
+representations first, then modules, then functions; a high-level mismatch
+usually explains lower ones. Refactor at the model's boundaries with names
+from the model. Parse once into structured data instead of interpreting the
+same input twice. Add a record, flag, or abstraction only when it clarifies
+the model.
 
-Ask for a bounded answer, such as at most 1,200 words. An open-ended request
-for a large subsystem can run long enough to stall delegation, and a short
-model is easier to debate.
+Target functions of at most 10 lines after normal formatting. Split at
+meaningful operations, never by packing lines or numbering helpers; an
+exhaustive dispatch may stay longer, reported as an exception. Follow Per
+Vognsen's [Bitwise](https://github.com/tsnl/bitwise) as
+[Resin's essay](https://github.com/tsnl/resin/blob/7a19915229414242bad5ecd7763299532610a02b/doc/bitwise.md)
+reads it: representations expose the problem's objects, control flow follows
+the problem, each helper makes one complete decision, and generic utilities
+need a demonstrated use.
 
-## Debate the model
+## Verify, repeat, report
 
-Treat the explanation as a hypothesis. Challenge it before adopting it:
+Make small changes and run the relevant checks. A cut is verified when its
+tests are gone and the tests of what remains pass. Keep a short record of
+accepted and rejected changes so later passes do not rediscover them; brief
+each new explainer fresh. Stop when the model is visible in the code and the
+remaining complexity serves real invariants, or when the user's pass limit is
+reached. Keeping the code is a valid outcome.
 
-- Trace concrete examples, including failures and boundary cases.
-- Start at the top: ask what breaks if a whole stage, protocol,
-  representation, or piece of stored state is removed, before examining
-  individual functions.
-- Ask what breaks if a negotiable requirement is dropped. If nothing the user
-  relies on breaks, propose dropping it.
-- Prefer state derived when needed to state stored and kept in sync, one
-  decision point to decisions spread across stages, and direct calls to
-  intermediate protocols.
-- Test ordering, identity, scope, lifetime, and error behavior where relevant.
-- Challenge proposals that add generic machinery or merely move bookkeeping.
-
-Let the explainer defend or revise its reasoning. Revise your own position when
-the evidence warrants it; agreement alone does not establish correctness.
-
-After the independent explanation, comparison with code may reveal facts needed
-to assess a proposal. Introduce only the relevant facts and distinguish required
-constraints from current design choices. This is informed critique, not another
-independent explanation. Do not promote an incidental implementation choice into
-a requirement for future agents.
-
-Share the refined explanation before substantial edits. Ask the user when
-intended behavior is materially unclear; routine comparison with the code is a
-self-review step and does not require approval.
-
-## Compare and simplify
-
-Ask: **Does the implementation directly represent this explanation?**
-
-Compare from the top down: first the system's stages, boundaries, and data
-representations; then each module; then functions. A mismatch at a higher
-level usually explains several at lower levels, and fixing it first avoids
-polishing code that is about to be deleted.
-
-Map each conceptual step to the code and its data. Look for places where a
-reader must reconstruct the model from nested branches, repeated interpretation,
-unrelated responsibilities, or state whose purpose cannot be explained locally.
-For a mismatch, decide whether the explanation omitted an invariant, the code
-contains unnecessary complexity, or behavior needs clarification. Neither the
-existing code nor an elegant explanation automatically settles that question.
-
-Refactor at those conceptual boundaries. Give helpers names that describe their
-role in the explanation. When validation and execution separately interpret the
-same input, consider parsing once into structured data that execution can
-consume directly. Reuse existing representations when they already express the
-needed distinctions. Introduce a record, flag, or abstraction only when it makes
-the model clearer. Fewer lines or traversals do not by themselves establish a
-simplification; separate straightforward passes may be easier to understand.
-
-## Keep functions small and code direct
-
-**Target at most 10 LOC per function by default**, including local and anonymous
-functions. Measure complete functions after normal formatting, following the
-repository's counting convention when one exists. Split at meaningful operations;
-do not pack statements onto fewer lines, remove useful comments, or introduce
-numbered continuation helpers to meet the count. Respect line-width and other
-style constraints. Review every function over the target. A coherent exhaustive
-dispatch or operation may remain longer when splitting would obscure its meaning;
-report such exceptions and explain why. Explicit user requirements take precedence.
-
-Use Per Vognsen's [Bitwise](https://github.com/pervognsen/bitwise), preserved at
-[tsnl/bitwise](https://github.com/tsnl/bitwise), as an important style reference.
-The [Ion constructors](https://github.com/tsnl/bitwise/blob/5a261e99efea080e1111a312d897f8d794f061a7/ion/ast.c)
-and [parser](https://github.com/tsnl/bitwise/blob/5a261e99efea080e1111a312d897f8d794f061a7/ion/parse.c)
-give concrete examples. Apply the following interpretation, also developed in
-[Resin's Bitwise essay](https://github.com/tsnl/resin/blob/7a19915229414242bad5ecd7763299532610a02b/doc/bitwise.md):
-
-- Let data representations expose the important objects and their relationships.
-  Construction should establish the guarantees later operations depend on.
-- Make control flow follow the problem: visible cases, stages, loops, and
-  structural recursion that a reader can explain locally.
-- Give each helper a complete decision or guarantee with a descriptive name.
-  Share semantic rules; similar-looking statements alone do not justify an
-  abstraction. Keep useful repetition when it makes distinct cases easier to read.
-- Prefer existing language facilities and a small public interface. Add custom
-  utilities or generic machinery only for a demonstrated need. Keep explanatory
-  comments about invariants, ownership, and deliberate tradeoffs.
-
-Adapt this taste to the target language and repository. The 10-LOC target is this
-skill's convention, not a claim that Bitwise itself imposes that limit. Judge a
-change by the reasoning it saves the reader, as well as the size of its functions.
-
-## Verify and repeat
-
-Make a small, reviewable change and run relevant checks, exercising any affected
-invariants. For a lossy change, delete the tests of removed behavior and keep
-or add tests for the essential behavior that remains; a cut is verified when
-those still pass. Update design notes within the authorized scope when they would
-otherwise describe the old structure. A pass that justifies keeping the code is
-also a useful result; do not manufacture edits to demonstrate progress.
-
-Read the main operation again from its caller's perspective, then follow helpers
-one level at a time. For another pass, brief a fresh explainer with the task
-contract and verified behavioral facts, excluding previous proposed solutions.
-Keep a short account of accepted changes and rejected alternatives in the parent
-context so the loop does not repeatedly rediscover the same tradeoff.
-
-Honor a requested single pass or explicit time/pass limit. When asked to iterate
-to convergence, continue until the user stops or redirects the work, or until
-no further useful simplification is supported by the review. Stop when the major
-steps are visible in the code, helper responsibilities are coherent, and remaining
-complexity serves concrete behavioral invariants. Do not keep cycling through
-cosmetic variants or claim that simplification is mathematically impossible.
-
-Report the useful conceptual changes, every behavior that was cut and why it
-was judged incidental, verification, and why the loop stopped. Mention a
-rejected alternative when it explains necessary remaining complexity.
+Report the conceptual changes, every cut and why it was incidental, the
+verification, and why the loop stopped.
