@@ -6,13 +6,16 @@ programming language, project, model provider, or host-specific tool names.
 
 ## Available skills
 
-- [simplify](simplify/SKILL.md): simplify a handful of recently written modules through
-  independent behavioral explanations, pseudocode, critical debate, and verified
+- [simplify](simplify/SKILL.md): simplify a handful of recently written modules
+  lossily and from the top down, through independent behavioral explanations,
+  a decision about which behavior is essential, critical debate, and verified
   refactoring. Each pass uses a fresh explainer, while the parent inspects and
-  edits the implementation. Preserve the user's scope and stop when further
-  changes would not improve clarity. Whole-program simplification requires
-  explicit user authorization. Target functions of at most 10 LOC and use
-  Bitwise as a reference for direct, explanatory code.
+  edits the implementation. Cut incidental behavior and report every cut; trim
+  stages, representations, and stored state before polishing functions.
+  Preserve the user's scope and stop when further changes would not improve
+  clarity. Whole-program simplification requires explicit user authorization.
+  Target functions of at most 10 LOC and use Bitwise as a reference for direct,
+  explanatory code.
 - [install-repository-skills](install-repository-skills/SKILL.md): install or
   repair this collection in a repository, pin it at `.agents/skills`, and share
   that checkout with Claude Code through a symlink.

@@ -1,14 +1,23 @@
 ---
 name: simplify
-description: Simplify a handful of recently written modules through independent behavioral explanations, pseudocode, critical debate, and verified refactoring. Use for focused clarity reviews; whole-program simplification requires explicit user authorization.
+description: Simplify a handful of recently written modules lossily and from the top down, through independent behavioral explanations, a decision about which behavior is essential, critical debate, and verified refactoring. Use for focused clarity reviews; whole-program simplification requires explicit user authorization.
 ---
 
 # Simplify
 
 Make the implementation a readable representation of the intended behavior.
-Work within the requested files and interfaces, preserving earlier approved
-behavior unless the user asks to change it. Carry the user's corrections, scope,
-style constraints, and verification requirements through every pass.
+Work within the requested files and interfaces. Carry the user's corrections,
+scope, style constraints, and verification requirements through every pass.
+
+Prefer lossy simplification. The best simplification removes behavior, cases,
+options, and generality that do not serve the user's purpose, rather than
+expressing all of them more neatly. Keep the behavior the user relies on; cut
+what is incidental, and say what was cut.
+
+Work from the top down. The largest savings come from the largest structures:
+a stage, protocol, representation, or piece of stored state that need not
+exist removes every function written to maintain it. Trim those before
+refining modules, and refine modules before polishing functions.
 
 ## Bound the scope
 
@@ -30,6 +39,23 @@ test or documentation edits within the user's permitted remit too. If a useful
 change requires broader scope, describe it and obtain authorization before
 making that change; continue useful work inside the existing scope.
 
+## Decide what is essential
+
+Lossiness needs a line between what must survive and what may go:
+
+- **Essential:** stated requirements, behavior the user or other work depends
+  on, user-visible contracts, and data that must persist.
+- **Incidental:** accidents of the current implementation, configurability or
+  generality nobody uses, handling of states that construction already rules
+  out, compatibility with callers that no longer exist, and features whose
+  cost exceeds their use.
+
+Cut incidental behavior by default, and remove its tests and documentation
+with it. Ask before removing essential behavior or anything the user
+explicitly requested. When it is unclear which side a behavior is on, describe
+the proposed cut and its consequence; small, reversible cuts may proceed
+within an already authorized lossy scope, provided they are reported.
+
 ## Obtain an independent explanation
 
 Use a fresh explainer subagent for each simplification pass, with no inherited
@@ -45,22 +71,36 @@ when permitted, but do not describe it as an independent review.
 
 Give the explainer a neutral behavioral brief: purpose, inputs, observable
 outputs, required semantics, representative examples, and relevant constraints.
-Distinguish requirements from assumptions and known implementation limitations.
+Distinguish requirements from assumptions and known implementation limitations,
+and mark which requirements are firm and which are negotiable.
 Do not include current helper names, internal decomposition, favored changes,
 previous proposals, or earlier agents' conclusions. Even a behavioral summary
 can bias the answer if it quietly prescribes the existing architecture.
 
 Ask for a high-level explanation, then more detailed pseudocode, invariants,
-edge cases, and unresolved assumptions. Each proposed stage or piece of state
-should have an explainable purpose. The aim is the simplest sufficient model,
-not a speculative redesign or a complete solution to adjacent problems.
+edge cases, and unresolved assumptions. Ask which negotiable requirements the
+explainer would drop or weaken to get a simpler model, and what each cut would
+cost. Each proposed stage or piece of state should have an explainable purpose.
+The aim is the simplest sufficient model, not a speculative redesign or a
+complete solution to adjacent problems.
+
+Ask for a bounded answer, such as at most 1,200 words. An open-ended request
+for a large subsystem can run long enough to stall delegation, and a short
+model is easier to debate.
 
 ## Debate the model
 
 Treat the explanation as a hypothesis. Challenge it before adopting it:
 
 - Trace concrete examples, including failures and boundary cases.
-- Ask what breaks if a stage, representation, or piece of state is removed.
+- Start at the top: ask what breaks if a whole stage, protocol,
+  representation, or piece of stored state is removed, before examining
+  individual functions.
+- Ask what breaks if a negotiable requirement is dropped. If nothing the user
+  relies on breaks, propose dropping it.
+- Prefer state derived when needed to state stored and kept in sync, one
+  decision point to decisions spread across stages, and direct calls to
+  intermediate protocols.
 - Test ordering, identity, scope, lifetime, and error behavior where relevant.
 - Challenge proposals that add generic machinery or merely move bookkeeping.
 
@@ -80,6 +120,11 @@ self-review step and does not require approval.
 ## Compare and simplify
 
 Ask: **Does the implementation directly represent this explanation?**
+
+Compare from the top down: first the system's stages, boundaries, and data
+representations; then each module; then functions. A mismatch at a higher
+level usually explains several at lower levels, and fixing it first avoids
+polishing code that is about to be deleted.
 
 Map each conceptual step to the code and its data. Look for places where a
 reader must reconstruct the model from nested branches, repeated interpretation,
@@ -132,7 +177,9 @@ change by the reasoning it saves the reader, as well as the size of its function
 ## Verify and repeat
 
 Make a small, reviewable change and run relevant checks, exercising any affected
-invariants. Update design notes within the authorized scope when they would
+invariants. For a lossy change, delete the tests of removed behavior and keep
+or add tests for the essential behavior that remains; a cut is verified when
+those still pass. Update design notes within the authorized scope when they would
 otherwise describe the old structure. A pass that justifies keeping the code is
 also a useful result; do not manufacture edits to demonstrate progress.
 
@@ -149,5 +196,6 @@ steps are visible in the code, helper responsibilities are coherent, and remaini
 complexity serves concrete behavioral invariants. Do not keep cycling through
 cosmetic variants or claim that simplification is mathematically impossible.
 
-Report the useful conceptual changes, verification, and why the loop stopped.
-Mention a rejected alternative when it explains necessary remaining complexity.
+Report the useful conceptual changes, every behavior that was cut and why it
+was judged incidental, verification, and why the loop stopped. Mention a
+rejected alternative when it explains necessary remaining complexity.
