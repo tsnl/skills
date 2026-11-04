@@ -1,0 +1,9 @@
+[submodule "humanizer"]
+	path = humanizer
+	url = https://github.com/blader/humanizer.git
+[submodule "vendor/hallmark"]
+	path = vendor/hallmark
+	url = https://github.com/Nutlope/hallmark.git
+[submodule "vendor/unslop"]
+	path = vendor/unslop
+	url = https://github.com/heydamir/unslop.git

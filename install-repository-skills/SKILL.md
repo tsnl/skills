@@ -29,7 +29,8 @@ for `tsnl/skills` as the same source. Inspect symlinks, including dangling links
 and their parent directories so writes stay inside the intended consumer.
 
 - If the expected submodule already exists, preserve its pin. Initialize an
-  uninitialized checkout with `git submodule update --init -- .agents/skills`;
+  uninitialized checkout with
+  `git submodule update --init --recursive -- .agents/skills`;
   leave an initialized checkout in place, including local changes.
 - If that submodule lives elsewhere, reuse it with `git mv` when migration is
   requested. Create `.agents` first. Git updates its path in `.gitmodules` and
@@ -53,6 +54,7 @@ consumer repository root:
 ```sh
 mkdir -p .agents
 git submodule add https://github.com/tsnl/skills.git .agents/skills
+git submodule update --init --recursive .agents/skills
 mkdir -p .claude
 ln -s ../.agents/skills .claude/skills
 ```
@@ -64,7 +66,7 @@ Claude checkout. An existing correct symlink needs no change. An empty ordinary
 directory can be removed with `rmdir` before linking, after checking its status;
 a nonempty directory requires the conflict handling above.
 
-Document `git submodule update --init .agents/skills` in the consumer's setup
+Document `git submodule update --init --recursive .agents/skills` in the consumer's setup
 instructions and explain the shared Claude path. Keep that documentation short;
 link to the skills repository for the workflow details.
 
