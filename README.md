@@ -21,13 +21,15 @@ npx skills update                          # update installed skills
   representations, and stored state are trimmed before functions, which target
   10 lines, in the style of Bitwise. Whole-program simplification requires
   explicit user authorization.
-- [install-repository-skills](skills/install-repository-skills/SKILL.md):
-  install, update, or migrate this collection with `npx skills`.
+- [bootstrap-skills](skills/bootstrap-skills/SKILL.md): installs this
+  collection and the companion skills below with `npx skills`, and migrates the
+  old submodule layout. Install it first and ask your agent to run it.
 
 ## Companion skills
 
 `npx skills` has no dependency mechanism, so these third-party skills are not
-bundled. Install them alongside if you want them:
+bundled. `bootstrap-skills` carries this list and installs them on request, or
+run them yourself:
 
 ```sh
 npx skills add blader/humanizer          # MIT: de-AI-ify prose
