@@ -33,6 +33,8 @@ bundled. Install them alongside if you want them:
 npx skills add blader/humanizer          # MIT: de-AI-ify prose
 npx skills add Nutlope/hallmark          # MIT: design pages that don't look generated
 npx skills add heydamir/unslop           # CC BY 4.0: redesign AI-looking UIs
+npx skills add GoogleChrome/modern-web-guidance   # Apache-2.0: steer agents to modern web platform features
+npx skills add cursor/plugins --skill thermo-nuclear-code-quality-review   # strict maintainability review
 ```
 
 Usage: `/simplify` in Claude Code or `$simplify` in Codex, naming the files to
