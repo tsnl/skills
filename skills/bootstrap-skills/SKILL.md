@@ -5,8 +5,8 @@ description: Bootstrap an agent skill setup with the npx skills CLI. Installs ts
 
 # Bootstrap skills
 
-`npx skills` has no dependency mechanism, so this skill is the dependency list.
-Install this collection first, then each companion below the user wants.
+`npx skills` has no dependency mechanism, so third-party skills are vendored
+here as submodules. Install this collection, then offer the extra companion below.
 
 ## Install
 
@@ -19,16 +19,13 @@ npx skills add tsnl/skills
 
 ## Companions
 
-Offer these; install only the ones the user accepts. Check each with `--list`,
-since upstream layouts can change, and report any that fail to resolve.
+`humanizer`, `hallmark`, `unslop` and `modern-web-guidance` are vendored as
+submodules, so the install above already includes them. Offer this one extra
+skill, which is not vendored; check it with `--list` first and report a failure:
 
-| Command | Purpose | License |
-| --- | --- | --- |
-| `npx skills add blader/humanizer` | Rewrite AI-sounding prose | MIT |
-| `npx skills add Nutlope/hallmark` | Design pages that don't look generated | MIT |
-| `npx skills add heydamir/unslop` | Redesign AI-looking UIs | CC BY 4.0 |
-| `npx skills add GoogleChrome/modern-web-guidance` | Modern web platform guidance | Apache-2.0 |
-| `npx skills add cursor/plugins --skill thermo-nuclear-code-quality-review` | Strict maintainability review | see upstream |
+```sh
+npx skills add cursor/plugins --skill thermo-nuclear-code-quality-review
+```
 
 ## Update and verify
 

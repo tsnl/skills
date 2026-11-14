@@ -22,21 +22,31 @@ npx skills update                          # update installed skills
   10 lines, in the style of Bitwise. Whole-program simplification requires
   explicit user authorization.
 - [bootstrap-skills](skills/bootstrap-skills/SKILL.md): installs this
-  collection and the companion skills below with `npx skills`, and migrates the
-  old submodule layout. Install it first and ask your agent to run it.
+  collection with `npx skills`, offers the non-vendored companion, and migrates
+  the old submodule layout.
 
-## Companion skills
+## Vendored third-party skills
 
-`npx skills` has no dependency mechanism, so these third-party skills are not
-bundled. `bootstrap-skills` carries this list and installs them on request, or
-run them yourself:
+Pinned as git submodules under `skills/`, so `npx skills add tsnl/skills`
+installs them with this collection (verified with `--list`):
+
+- [humanizer](https://github.com/blader/humanizer) (MIT, blader): rewrite
+  AI-sounding prose without changing what it says.
+- [hallmark](https://github.com/Nutlope/hallmark) (MIT, Nutlope): design new
+  pages that look designed rather than generated. Its optional image step calls
+  Together AI only when `TOGETHER_API_KEY` is set.
+- [unslop](https://github.com/heydamir/unslop) (CC BY 4.0, Damir Sokolovsky):
+  turn an existing AI-looking UI into a designed interface.
+- [modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance)
+  (Apache-2.0, Google Chrome): steer agents toward modern web platform features.
+
+Update a pin with `git submodule update --remote skills/<name>` and review the
+log before committing. Clone with `--recurse-submodules` when developing here.
+
+Not vendored, because it lives in the large `cursor/plugins` repository:
 
 ```sh
-npx skills add blader/humanizer          # MIT: de-AI-ify prose
-npx skills add Nutlope/hallmark          # MIT: design pages that don't look generated
-npx skills add heydamir/unslop           # CC BY 4.0: redesign AI-looking UIs
-npx skills add GoogleChrome/modern-web-guidance   # Apache-2.0: steer agents to modern web platform features
-npx skills add cursor/plugins --skill thermo-nuclear-code-quality-review   # strict maintainability review
+npx skills add cursor/plugins --skill thermo-nuclear-code-quality-review
 ```
 
 Usage: `/simplify` in Claude Code or `$simplify` in Codex, naming the files to

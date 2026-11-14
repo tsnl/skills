@@ -7,3 +7,6 @@
 [submodule "skills/unslop"]
 	path = skills/unslop
 	url = https://github.com/heydamir/unslop.git
+[submodule "skills/modern-web-guidance"]
+	path = skills/modern-web-guidance
+	url = https://github.com/GoogleChrome/modern-web-guidance.git
