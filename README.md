@@ -21,9 +21,6 @@ npx skills update                          # update installed skills
   representations, and stored state are trimmed before functions, which target
   10 lines, in the style of Bitwise. Whole-program simplification requires
   explicit user authorization.
-- [bootstrap-skills](skills/bootstrap-skills/SKILL.md): installs this
-  collection with `npx skills`, offers the non-vendored companion, and migrates
-  the old submodule layout.
 
 ## Vendored third-party skills
 
@@ -43,7 +40,7 @@ installs them with this collection (verified with `--list`):
 Update a pin with `git submodule update --remote skills/<name>` and review the
 log before committing. Clone with `--recurse-submodules` when developing here.
 
-Not vendored, because it lives in the large `cursor/plugins` repository:
+Not vendored, because it lives in the large `cursor/plugins` repository, so install it separately:
 
 ```sh
 npx skills add cursor/plugins --skill thermo-nuclear-code-quality-review
@@ -51,3 +48,5 @@ npx skills add cursor/plugins --skill thermo-nuclear-code-quality-review
 
 Usage: `/simplify` in Claude Code or `$simplify` in Codex, naming the files to
 review, behavior to preserve, and any limits.
+
+See [AGENTS.md](AGENTS.md) for installation, migration and development notes.
